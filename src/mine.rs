@@ -1,10 +1,8 @@
 use std::{sync::Arc, sync::RwLock, time::Instant, str::FromStr};
 
 use colored::*;
-use drillx::{
-    equix::{self},
-    Hash, Solution,
-};
+use drillx_2::equix::{self};
+use drillx::{Hash, Solution};
 use ore_api::{
     consts::{BUS_ADDRESSES, BUS_COUNT, EPOCH_DURATION},
     state::{Bus, Config, Proof},
@@ -67,7 +65,7 @@ impl Miner {
             // Calculate cutoff time
             let cutoff_time = self.get_cutoff(proof, args.buffer_time).await;
 
-            // Run drillx
+            // Run drillx_2
             let solution =
                 Self::find_hash_par(proof, cutoff_time, args.cores, config.min_difficulty as u32)
                     .await;
@@ -131,22 +129,24 @@ impl Miner {
                         let mut best_hash = Hash::default();
                         loop {
                             // Create hash
-                            if let Ok(hx) = drillx::hash_with_memory(
+                            let hashes = drillx_2::get_hashes_with_memory(
                                 &mut memory,
                                 &proof.challenge,
                                 &nonce.to_le_bytes(),
-                            ) {
+                            );
+                            for hx in hashes.iter() {
                                 let difficulty = hx.difficulty();
                                 if difficulty.gt(&best_difficulty) {
                                     best_nonce = nonce;
                                     best_difficulty = difficulty;
-                                    best_hash = hx;
-                                    // {{ edit_1 }}
+                                    best_hash = Hash {
+                                      d: hx.d,
+                                      h: hx.h
+                                    };
                                     if best_difficulty.gt(&*global_best_difficulty.read().unwrap())
                                     {
                                         *global_best_difficulty.write().unwrap() = best_difficulty;
                                     }
-                                    // {{ edit_1 }}
                                 }
                             }
 

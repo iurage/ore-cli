@@ -1392,14 +1392,26 @@ dependencies = [
 
 [[package]]
 name = "drillx"
-version = "2.0.0"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c5fd3a8f11a6420d6efb1952c8c2e788627cb2c9e834537dc4b6bd036461646"
+checksum = "356f272108d63b02f6dc5f813e63bfc72a004a486fe4dec73595c0fba70e5c4a"
 dependencies = [
  "equix",
  "serde",
  "sha3 0.10.8",
  "solana-program",
+ "strum",
+]
+
+[[package]]
+name = "drillx_2"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "af4e3aca4ae86ab0d0050f50b322adab7c0e93904896a5c60bdb33324ea1d36a"
+dependencies = [
+ "equix",
+ "serde",
+ "sha3 0.10.8",
  "strum",
 ]
 
@@ -2783,6 +2795,7 @@ dependencies = [
  "colored",
  "core_affinity",
  "drillx",
+ "drillx_2",
  "futures",
  "indicatif",
  "num_cpus",
