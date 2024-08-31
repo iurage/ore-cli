@@ -45,9 +45,16 @@ pub async fn get_updated_proof_with_authority(
     authority: Pubkey,
     lash_hash_at: i64,
 ) -> Proof {
+    let mut attempts = 0;
+    let max_attempts = 5;
+
     loop {
+        attempts += 1;
         let proof = get_proof_with_authority(client, authority).await;
         if proof.last_hash_at.gt(&lash_hash_at) {
+            return proof;
+        }
+        if attempts >= max_attempts {
             return proof;
         }
         std::thread::sleep(Duration::from_millis(1000));
