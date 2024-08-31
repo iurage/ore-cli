@@ -55,19 +55,46 @@ pub async fn get_updated_proof_with_authority(
 }
 
 pub async fn get_proof(client: &RpcClient, address: Pubkey) -> Proof {
-    let data = client
-        .get_account_data(&address)
-        .await
-        .expect("Failed to get proof account");
-    *Proof::try_from_bytes(&data).expect("Failed to parse proof account")
+  let mut attempts = 0;
+  let max_attempts = 5;
+  let backoff = Duration::from_secs(2);
+
+  loop {
+      match client.get_account_data(&address).await {
+          Ok(data) => {
+              return *Proof::try_from_bytes(&data)
+                  .expect("Failed to parse proof account");
+          }
+          Err(e) => {
+              attempts += 1;
+              if attempts >= max_attempts {
+                  panic!("Failed to get proof account after {} attempts: {}", max_attempts, e);
+              }
+              sleep(backoff).await;
+          }
+      }
+  }
 }
 
 pub async fn get_clock(client: &RpcClient) -> Clock {
-    let data = client
-        .get_account_data(&sysvar::clock::ID)
-        .await
-        .expect("Failed to get clock account");
-    bincode::deserialize::<Clock>(&data).expect("Failed to deserialize clock")
+  let mut attempts = 0;
+  let max_attempts = 5;
+  let backoff = Duration::from_secs(2);
+
+  loop {
+      match client.get_account_data(&sysvar::clock::ID).await {
+          Ok(data) => {
+              return bincode::deserialize::<Clock>(&data).expect("Failed to deserialize clock")
+          }
+          Err(e) => {
+              attempts += 1;
+              if attempts >= max_attempts {
+                  panic!("Failed to get clock account after {} attempts: {}", max_attempts, e);
+              }
+              sleep(backoff).await;
+          }
+      }
+  }
 }
 
 pub fn amount_u64_to_string(amount: u64) -> String {
